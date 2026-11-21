@@ -1,0 +1,104 @@
+﻿<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Checkout | PUFF POINT</title>
+<link rel="stylesheet" href="shop.css">
+</head><body>
+<div class="top"><a class="logo" href="index.html">PUFF POINT</a><a class="cartlink" href="cart.html">Cart<span id="cartBadge">0</span></a></div>
+<div class="w">
+<h1>Checkout</h1>
+<div class="shipbar" id="shipbar"></div>
+<div id="done" style="display:none" class="glass"></div>
+<form id="form" class="cols" novalidate>
+<div class="glass">
+  <h2>Contact</h2>
+  <label>Full name</label><input id="name" autocomplete="name">
+  <div class="two"><div><label>Email</label><input id="email" type="email" autocomplete="email"></div><div><label>Phone</label><input id="phone" type="tel" autocomplete="tel"></div></div>
+  <h2 style="margin-top:28px">Shipping Address</h2>
+  <label>Street address</label><input id="addr" autocomplete="street-address">
+  <div class="two"><div><label>City</label><input id="city"></div><div><label>ZIP</label><input id="zip" inputmode="numeric"></div></div>
+  <label>State</label><select id="state"><option value="">Select state</option></select>
+  <h2 style="margin-top:28px">Age Verification</h2>
+  <label>Date of birth</label><input id="dob" type="date">
+  <div class="note">An adult (21+) must sign on delivery and may be asked for ID. ID upload / third-party age verification will be connected before launch.</div>
+  <label class="chk"><input type="checkbox" id="agree"> I confirm I am 21 or older and agree to the <a href="terms.html" target="_blank">Terms</a>, <a href="shipping.html" target="_blank">Shipping Policy</a> and <a href="returns.html" target="_blank">Returns</a>.</label>
+  <div id="pointsBox"></div>
+  <h2 style="margin-top:28px">Payment</h2>
+  <div class="note">Payment processor not connected yet. Placing an order now saves it as a TEST order only. No money is charged.</div>
+  <div class="err" id="err"></div>
+  <button type="submit" class="btn fill block">Place Order (Test)</button>
+</div>
+<div class="glass sum" id="summary"></div>
+</form>
+<div class="warn">WARNING: This product contains nicotine. Nicotine is an addictive chemical. Adults 21+ only.</div>
+</div>
+<div class="tabbar" role="navigation" aria-label="Main">
+<a href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</a>
+<a href="index.html?search#collection" id="tabSearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Search</a>
+<a href="account.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Account</a>
+<a href="cart.html" class="on"><svg viewBox="0 0 24 24"><path d="M3 4h2.5l2 11h10.5l2-8H7"/><circle cx="9.5" cy="19" r="1.4"/><circle cx="16.5" cy="19" r="1.4"/></svg>Cart<span class="cartbadge">0</span></a>
+<a href="rewards.html"><svg viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="4"/><path d="M5 12v8h14v-8"/><path d="M12 8v12"/><path d="M12 8c-1.5-3-5-3.5-5-1.5S10 8 12 8zm0 0c1.5-3 5-3.5 5-1.5S14 8 12 8z"/></svg>Rewards</a>
+</div>
+<script src="shop.js"></script>
+<script>
+/* Edit this list to only the states you can legally ship to. */
+var STATES=['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+var sel=document.getElementById('state');
+STATES.forEach(function(s){var o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o)});
+
+function disc(){var cb=document.getElementById('usePts');return pointsDiscount(currentUser(),subtotal(),cb&&cb.checked)}
+function summary(){
+  var lines=cartLines(),sub=subtotal(),ship=shippingCost(sub),d=disc(),h='<h2>Your Order</h2>';
+  lines.forEach(function(l){h+='<div><span>'+l.name+' x '+l.qty+'</span><span>'+money(l.price*l.qty)+'</span></div>'});
+  h+='<div style="border-top:1px solid var(--line);margin-top:8px"><span>Subtotal</span><span>'+money(sub)+'</span></div><div><span>Shipping</span><span>'+(ship===0?'FREE':money(ship))+'</span></div>';
+  if(d.amount>0)h+='<div style="color:#8fd9a0"><span>Rewards ('+d.pts+' pts)</span><span>-'+money(d.amount)+'</span></div>';
+  h+='<div class="total"><span>Total</span><span>'+money(sub+ship-d.amount)+'</span></div>';
+  var u=currentUser();if(u)h+='<div style="font-size:12px;color:var(--muted)"><span>You will earn about '+Math.floor((sub+ship-d.amount)*REWARDS.perDollar*tierOf(u).mult)+' points</span><span></span></div>';
+  document.getElementById('summary').innerHTML=h;
+}
+function pointsBox(){
+  var u=currentUser(),b=document.getElementById('pointsBox');
+  if(!u){b.innerHTML='<h2 style="margin-top:28px">Rewards</h2><div class="note"><a href="account.html">Join or sign in</a> to earn points on this order. 1 point per $1.</div>';return}
+  var can=u.points>=REWARDS.minRedeem;
+  b.innerHTML='<h2 style="margin-top:28px">Rewards</h2><div class="note">Signed in as '+u.email+'. You have <b>'+u.points+' points</b> ('+money(u.points*REWARDS.pointValue)+').</div>'+(can?'<label class="chk"><input type="checkbox" id="usePts"> Use my points on this order</label>':'<div style="font-size:12px;color:var(--muted)">Redeem from '+REWARDS.minRedeem+' points.</div>');
+  var c=document.getElementById('usePts');if(c)c.addEventListener('change',summary);
+  document.getElementById('name').value=u.name;document.getElementById('email').value=u.email;
+}
+function ageOf(d){var b=new Date(d),n=new Date(),a=n.getFullYear()-b.getFullYear(),m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))a--;return a}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+if(!cartLines().length){
+  document.getElementById('form').style.display='none';
+  document.getElementById('done').style.display='block';
+  document.getElementById('done').innerHTML='<div class="empty"><p>Your cart is empty.</p><a class="btn" href="index.html#shop">Continue Shopping</a></div>';
+}else{pointsBox();summary();}
+
+document.getElementById('form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var v=function(id){return document.getElementById(id).value.trim()},err=document.getElementById('err');
+  var f={name:v('name'),email:v('email'),phone:v('phone'),addr:v('addr'),city:v('city'),zip:v('zip'),state:v('state'),dob:v('dob')};
+  for(var k in f)if(!f[k]){err.textContent='Please fill in all fields.';return}
+  if(!/^\S+@\S+\.\S+$/.test(f.email)){err.textContent='Enter a valid email.';return}
+  if(!/^\d{5}(-\d{4})?$/.test(f.zip)){err.textContent='Enter a valid 5-digit ZIP.';return}
+  var age=ageOf(f.dob);
+  if(isNaN(age)||age<MIN_AGE){err.textContent='You must be '+MIN_AGE+' or older to order.';return}
+  if(!document.getElementById('agree').checked){err.textContent='Please confirm the age and terms checkbox.';return}
+  err.textContent='';
+  var sub=subtotal(),ship=shippingCost(sub),id='PP-'+Date.now().toString(36).toUpperCase();
+  var dd=disc();var order={id:id,date:new Date().toISOString(),test:true,customer:f,items:cartLines(),subtotal:sub,shipping:ship,discount:dd.amount,pointsUsed:dd.pts,total:sub+ship-dd.amount};var earned=0,cu=currentUser();if(cu&&cu.email===f.email.toLowerCase()){earned=settlePoints(cu.email,dd.pts,order.total)}order.pointsEarned=earned;
+  try{var o=JSON.parse(localStorage.getItem('pp_orders')||'[]');o.push(order);localStorage.setItem('pp_orders',JSON.stringify(o))}catch(x){}
+  saveCart({});
+  document.getElementById('form').style.display='none';
+  var d=document.getElementById('done');d.style.display='block';
+  d.innerHTML='<h2>Thank you, '+esc(f.name)+'!</h2><p>Test order <b style="color:var(--gold2)">'+id+'</b> received. Total '+money(order.total)+'.'+(earned?' You earned <b style="color:var(--gold2)">'+earned+' reward points</b>.':'')+'</p><div class="note">This was a TEST order. No payment was taken and nothing will ship until a payment processor and real order system are connected.</div><a class="btn" href="index.html">Back to Store</a>';
+  window.scrollTo(0,0);
+});
+</script>
+</body></html>
+
+
+
+
+
+
+
