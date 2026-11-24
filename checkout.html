@@ -18,6 +18,7 @@
   <label>Street address</label><input id="addr" autocomplete="street-address">
   <div class="two"><div><label>City</label><input id="city"></div><div><label>ZIP</label><input id="zip" inputmode="numeric"></div></div>
   <label>State</label><select id="state"><option value="">Select state</option></select>
+  <p style="font-size:13px;color:#d9c08a;margin:6px 0 0">Not seeing your state? We cannot ship there yet. <a href="states.html">See states</a></p>
   <h2 style="margin-top:28px">Age Verification</h2>
   <label>Date of birth</label><input id="dob" type="date">
   <div class="note">An adult (21+) must sign on delivery and may be asked for ID. ID upload / third-party age verification will be connected before launch.</div>
@@ -41,10 +42,8 @@
 </div>
 <script src="shop.js"></script>
 <script>
-/* Edit this list to only the states you can legally ship to. */
-var STATES=['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
 var sel=document.getElementById('state');
-STATES.forEach(function(s){var o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o)});
+SHIP_STATES.forEach(function(s){var o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o)});
 
 function disc(){var cb=document.getElementById('usePts');return pointsDiscount(currentUser(),subtotal(),cb&&cb.checked)}
 function summary(){
