@@ -21,8 +21,11 @@
   <p style="font-size:13px;color:#d9c08a;margin:6px 0 0">Not seeing your state? We cannot ship there yet. <a href="states.html">See states</a></p>
   <h2 style="margin-top:28px">Age Verification</h2>
   <label>Date of birth</label><input id="dob" type="date">
-  <div class="note">An adult (21+) must sign on delivery and may be asked for ID. ID upload / third-party age verification will be connected before launch.</div>
+  <div class="note">The carrier will ask for the signature of an adult (21+) and check a government photo ID at delivery. No signature or ID: no delivery, and the order is returned. ID upload / third-party age verification will be connected before launch.</div>
   <label class="chk"><input type="checkbox" id="agree"> I confirm I am 21 or older and agree to the <a href="terms.html" target="_blank">Terms</a>, <a href="shipping.html" target="_blank">Shipping Policy</a> and <a href="returns.html" target="_blank">Returns</a>.</label>
+  <label class="chk"><input type="checkbox" id="sign"> I will be there to sign for this order, and I understand an adult (21+) with valid ID must sign.</label>
+  <label class="chk"><input type="checkbox" id="law"> It is legal for me to buy and possess these products at my address, and I will pay any state or local tax that applies.</label>
+  <div class="note">Taxes: where a state or city charges tax on vapor products, it is shown at checkout before you pay. Final tax rules are confirmed per state before launch.</div>
   <div id="pointsBox"></div>
   <h2 style="margin-top:28px">Payment</h2>
   <div class="note">Payment processor not connected yet. Placing an order now saves it as a TEST order only. No money is charged.</div>
@@ -82,6 +85,8 @@ document.getElementById('form').addEventListener('submit',function(e){
   var age=ageOf(f.dob);
   if(isNaN(age)||age<MIN_AGE){err.textContent='You must be '+MIN_AGE+' or older to order.';return}
   if(!document.getElementById('agree').checked){err.textContent='Please confirm the age and terms checkbox.';return}
+  if(!document.getElementById('sign').checked||!document.getElementById('law').checked){err.textContent='Please tick the signature and legal-to-buy boxes.';return}
+  if(typeof SHIP_STATES!=='undefined'&&SHIP_STATES.indexOf(f.state)<0){err.textContent='We cannot ship to '+f.state+'.';return}
   err.textContent='';
   var sub=subtotal(),ship=shippingCost(sub),id='PP-'+Date.now().toString(36).toUpperCase();
   var dd=disc();var order={id:id,date:new Date().toISOString(),test:true,customer:f,items:cartLines(),subtotal:sub,shipping:ship,discount:dd.amount,pointsUsed:dd.pts,total:sub+ship-dd.amount};var earned=0,cu=currentUser();if(cu&&cu.email===f.email.toLowerCase()){earned=settlePoints(cu.email,dd.pts,order.total)}order.pointsEarned=earned;
